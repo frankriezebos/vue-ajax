@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Vue.js Shopping List</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="css/style.css">
+        <script src="https://unpkg.com/vue@3"></script>
+        <script type="module" src="src/index.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    </head>
+
+    <body>
+        <div class="ui middle aligned column centered grid h-100">
+            <div class="column">
+                <div class="ui card centered">
+                    <div class="content" id="shopping-list">
+                        <div class="header">
+                            <h1 class="ui header">{{header ? header : 'welcome'}}</h1>
+                            <button v-if="editing" @click="doEdit(false)" class="ui negative basic button">Cancel</button>
+                            <button v-else @click="doEdit(true)" class="ui primary basic button">Add item</button>
+                        </div>
+
+                        <div v-if="editing" class="add-item-form">
+                            <br>
+
+                            <div class="ui input">
+                                <input @keyup.enter="saveItem" v-model="newItem" type="text" placeholder="add new item">
+                            </div>
+
+                            <div class="ui input">
+                                <button 
+                                    :disabled="newItem.length < 5" 
+                                    @click="saveItem" 
+                                    class="ui primary button">
+                                        Save
+                                </button>
+                            </div>
+
+                            <br>
+                            <br>
+
+                            <strong>Priority</strong>
+
+                            <br>
+
+                            <label>
+                                <input type="checkbox" v-model="newItemHighPriority">
+                                High priority
+                            </label>
+
+                            <br>
+                            <br>
+                        </div>
+
+                        <div v-if="items.length === 0" class="ui success message">
+                            <div class="header">
+                                Nice! You've bought all items.
+                            </div>
+                          </div>
+
+                        <div class="ui relaxed divided list">
+                            <div 
+                                class="item" 
+                                v-for="item in orderedUsers" 
+                                :id="item.id" 
+                                :key="item.id" 
+                                @click="togglePurchased(item)"
+                                :class="{strikeout: item.purchased, priority: item.highPriority}"
+                            >
+                                <div class="content">
+                                    <div class="header">
+                                        {{item.label}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const shoppingList = Vue.createApp({
+                data() {
+                    return {
+                        header: "Shopping List",
+                        subheader: "Vue.JS v3",
+                        newItem: '',
+                        newItemPriority: 'low',
+                        editing: false,
+                        newItemHighPriority: false,
+                        items:[
+                            {id: 1, label:'10 party hats', purchased: true, highPriority: false},
+                            {id: 2, label:'2 board games', purchased: true, highPriority: false},
+                            {id: 3, label:'20 cups', purchased: false, highPriority: true},
+                        ]
+                    }
+                },
+                computed: {
+                    reversedItems() {
+                        return [...this.items].reverse()
+                    },
+                    orderedUsers: function () {
+                        return _.orderBy(this.items, 'highPriority')
+                    }
+                },
+                methods:{
+                    saveItem(){
+                        this.items.push({
+                            id:this.items.length + 1, 
+                            label: this.newItem,
+                            highPriority: this.newItemHighPriority
+                        })
+                        this.newItem = ""
+                        this.newItemHighPriority = false
+                    },
+                    doEdit(editing) {
+                        this.editing = editing
+                        this.newItem = ""
+                        this.newItemHighPriority = false
+                    },
+                    togglePurchased(item) {
+                        item.purchased = !item.purchased
+                    }
+                }
+            })
+            .mount('#shopping-list')
+        </script>
+    </body>
+</html>
